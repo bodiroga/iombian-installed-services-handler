@@ -17,3 +17,4 @@ typer==0.12.3
 typing_extensions==4.11.0
 urllib3==2.2.1
 watchdog==4.0.0
+sdnotify==0.3.2

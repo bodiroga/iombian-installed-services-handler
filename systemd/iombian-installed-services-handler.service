@@ -1,0 +1,15 @@
+[Unit]
+Description=IoMBian Installed Services Handler
+
+[Service]
+Type=notify
+User=iompi
+Restart=always
+RestartSec=5
+TimeoutStopSec=5
+
+WorkingDirectory=/opt/iombian-installed-services-handler
+ExecStart=/opt/iombian-installed-services-handler/.venv/bin/python /opt/iombian-installed-services-handler/src/main.py
+
+[Install]
+WantedBy=multi-user.target

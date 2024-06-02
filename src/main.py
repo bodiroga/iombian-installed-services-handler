@@ -2,6 +2,8 @@ import logging
 import os
 import signal
 
+import sdnotify
+
 from iombian_services_handler import IombianServicesHandler
 
 BASE_PATH = os.environ.get("BASE_PATH", "/opt/iombian-services")
@@ -22,6 +24,8 @@ if __name__ == "__main__":
     iombian_services_handler = IombianServicesHandler(BASE_PATH, WAIT_SECONDS)
     iombian_services_handler.read_local_services()
     iombian_services_handler.start()
+    notifier = sdnotify.SystemdNotifier()
+    notifier.notify("READY=1")
 
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
