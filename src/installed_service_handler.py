@@ -43,9 +43,13 @@ class InstalledServiceHandler(FileSystemEventHandler):
 
     def start(self):
         """Start the handler by starting the observer of the service folder."""
-        logger.debug(f"{self.service_name} Installed Service Handler started.")
-        self.observer.schedule(self, self.service_path, recursive=True)
-        self.observer.start()
+        try:
+            self.observer.schedule(self, self.service_path, recursive=True)
+            self.observer.start()
+            logger.debug(f"{self.service_name} Installed Service Handler started.")
+        except FileNotFoundError:
+            logger.error(f"Couldn't start a watcher for the {self.service_name} service, the folder no longer exists.")
+            self.down()
 
     def stop(self):
         """Stop the handler by stopping the observer of the service folder."""
@@ -55,8 +59,11 @@ class InstalledServiceHandler(FileSystemEventHandler):
     def up(self):
         """Start the compose of the service by doing "docker compose up"."""
         if self.docker:
-            logger.debug(f"{self.service_name} service compose started.")
-            self.docker.compose.up(detach=True)
+            try:
+                self.docker.compose.up(detach=True)
+                logger.debug(f"{self.service_name} service compose started.")
+            except:
+                logger.error(f"An error occurred, couldn't start service {self.service_name}.")
 
     def down(self):
         """Stop the compose of the service.
