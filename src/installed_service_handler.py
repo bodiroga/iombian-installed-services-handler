@@ -1,10 +1,11 @@
 import logging
 import os
+import pathlib
 from threading import Timer
 from typing import List, Optional
 
 from python_on_whales import DockerClient, docker
-from watchdog.events import DirModifiedEvent, FileSystemEvent, FileSystemEventHandler
+from watchdog.events import FileSystemEvent, FileSystemEventHandler
 from watchdog.observers import Observer
 from watchdog.observers.api import BaseObserver
 
@@ -16,6 +17,9 @@ class InstalledServiceHandler(FileSystemEventHandler):
 
     When a change occurs on the service the compose restarts.
     """
+
+    ACCEPTED_FILES = ["docker-compose.yaml", "docker-compose.yml", ".env"]
+    ACCEPTED_EVENTS = ["modified", "created", "deleted"]
 
     service_path: str
     """The full path of the service"""
@@ -48,7 +52,9 @@ class InstalledServiceHandler(FileSystemEventHandler):
             self.observer.start()
             logger.debug(f"{self.service_name} Installed Service Handler started.")
         except FileNotFoundError:
-            logger.error(f"Couldn't start a watcher for the {self.service_name} service, the folder no longer exists.")
+            logger.error(
+                f"Couldn't start a watcher for the {self.service_name} service, the folder no longer exists."
+            )
             self.down()
 
     def stop(self):
@@ -63,7 +69,9 @@ class InstalledServiceHandler(FileSystemEventHandler):
                 self.docker.compose.up(detach=True)
                 logger.debug(f"{self.service_name} service compose started.")
             except:
-                logger.error(f"An error occurred, couldn't start service {self.service_name}.")
+                logger.error(
+                    f"An error occurred, couldn't start service {self.service_name}."
+                )
 
     def down(self):
         """Stop the compose of the service.
@@ -103,17 +111,30 @@ class InstalledServiceHandler(FileSystemEventHandler):
 
         self.timer = None
 
-    def on_modified(self, event: FileSystemEvent):
-        """When a change occurs on the service folder, use a timer to call the `reload_service_compose` function."""
-        if not isinstance(event, DirModifiedEvent):
+    def on_any_event(self, event: FileSystemEvent):
+        """Reload the service when the service changes.
+
+        The service changes when the docker-compose file or the .env file changes in the first level of the folder.
+
+        """
+        if event.is_directory:
             return
 
-        if self.timer:
-            self.timer.cancel()
-            self.timer = None
+        path = pathlib.Path(event.src_path)
+        file = path.name
+        folder = path.parts[-2]
 
-        self.timer = Timer(self.wait_seconds, self.reload_service_compose)
-        self.timer.start()
+        if (
+            file in self.ACCEPTED_FILES
+            and folder == self.service_name
+            and event.event_type in self.ACCEPTED_EVENTS
+        ):
+            if self.timer:
+                self.timer.cancel()
+                self.timer = None
+
+            self.timer = Timer(self.wait_seconds, self.reload_service_compose)
+            self.timer.start()
 
     def _get_compose_file_name(self):
         """Get the name of the compose file in the service.

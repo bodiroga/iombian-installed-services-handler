@@ -1,5 +1,6 @@
 import logging
 import os
+import pathlib
 from typing import List
 
 from watchdog.events import (
@@ -86,7 +87,7 @@ class IombianServicesHandler(FileSystemEventHandler):
         if not isinstance(event, DirDeletedEvent):
             return
 
-        service_name = event.src_path
+        service_name = pathlib.Path(event.src_path).stem
         service = self._get_service_by_name(service_name)
         if service:
             service.stop()
