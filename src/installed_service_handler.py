@@ -67,7 +67,7 @@ class InstalledServiceHandler(FileSystemEventHandler):
         if self.docker:
             try:
                 self.docker.compose.up(detach=True)
-                logger.debug(f"{self.service_name} service compose started.")
+                logger.info(f"{self.service_name} service compose started.")
             except:
                 logger.error(
                     f"An error occurred, couldn't start service {self.service_name}."
@@ -83,7 +83,7 @@ class InstalledServiceHandler(FileSystemEventHandler):
         But, in that case, the compose file no longer exists, so "docker compose down" can't be called.
         """
         if self.docker:
-            logger.debug(f"{self.service_name} service compose stopped.")
+            logger.info(f"{self.service_name} service compose stopped.")
             containers = self.docker.ps(
                 filters={
                     "label": f"com.docker.compose.project.config_files={self.service_path}/{self.compose_file}"

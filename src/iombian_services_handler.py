@@ -72,12 +72,14 @@ class IombianServicesHandler(FileSystemEventHandler):
         if not isinstance(event, DirCreatedEvent):
             return
 
-        service_name = event.src_path
-        service = InstalledServiceHandler(service_name, self.wait_seconds)
+        service_path = event.src_path
+        service_name = pathlib.Path(service_path).stem
+        logger.debug(f"{service_name} service folder was created.")
+        service = InstalledServiceHandler(service_path, self.wait_seconds)
         service.up()
         service.start()
         self.services.append(service)
-        logger.debug(f"{service_name} service added.")
+        logger.debug(f"{service_path} service added.")
 
     def on_deleted(self, event: FileSystemEvent):
         """When a service is removed from "iombian-services", stop the service and the compose of the services.
@@ -88,6 +90,7 @@ class IombianServicesHandler(FileSystemEventHandler):
             return
 
         service_name = pathlib.Path(event.src_path).stem
+        logger.debug(f"{service_name} service folder was removed.")
         service = self._get_service_by_name(service_name)
         if service:
             service.stop()
