@@ -9,7 +9,7 @@ RestartSec=5
 TimeoutStopSec=5
 
 WorkingDirectory=/opt/iombian-installed-services-handler
-ExecStart=/opt/iombian-installed-services-handler/.venv/bin/python /opt/iombian-installed-services-handler/src/main.py
+ExecStart=/opt/iombian-installed-services-handler/.venv/bin/python /opt/iombian-installed-services-handler/main.py
 
 [Install]
 WantedBy=multi-user.target
