@@ -1,4 +1,4 @@
-FROM python:3.9.2-slim
+FROM python:3.9-slim-bookworm
 WORKDIR /app
 COPY requirements.txt ./
 RUN pip install --upgrade pip
