@@ -19,3 +19,4 @@ typing_extensions==4.11.0
 urllib3==2.2.1
 watchdog==4.0.0
 sdnotify==0.3.2
+pyzmq==25.1.2
